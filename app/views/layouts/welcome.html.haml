@@ -1,0 +1,19 @@
+!!!
+%html
+  %head
+    %title kabam             
+    = stylesheet_link_tag "application", :media => "all"
+  %body#login
+    #login-wrapper
+      #login-top
+        %h2 Kabam游戏登入        
+      #login-content
+        - unless flash[:alert].blank?   
+          .alert
+            %strong 警告       
+            = flash[:alert]    
+        - unless flash[:notice].blank?  
+          .alert.alert-info
+            = flash[:notice]   
+        = yield
+

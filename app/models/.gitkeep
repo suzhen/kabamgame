@@ -1,0 +1,246 @@
+0023:.:0:3:14=5098c650:16=5098c650:002f:views:000000000:2:14=5098d86d:16=5098d86d:0030:devise:000000000:2:14=5098d275:16=5098d275:0030:shared:000000000:2:14=5098df04:16=5098df04:0034:_links.erb:00000044b:1:14=5098df04:16=5098df04:<%- if controller_name != 'sessions' %>
+  <%= link_to "Sign in", new_session_path(resource_name) %><br />
+<% end -%>
+
+<%- if devise_mapping.registerable? && controller_name != 'registrations' %>
+  <%= link_to "Sign up", new_registration_path(resource_name) %><br />
+<% end -%>
+
+<%- if devise_mapping.recoverable? && controller_name != 'passwords' %>
+  <%= link_to "Forgot your password?", new_password_path(resource_name) %><br />
+<% end -%>
+
+<%- if devise_mapping.confirmable? && controller_name != 'confirmations' %>
+  <%= link_to "Didn't receive confirmation instructions?", new_confirmation_path(resource_name) %><br />
+<% end -%>
+
+<%- if devise_mapping.lockable? && resource_class.unlock_strategy_enabled?(:email) && controller_name != 'unlocks' %>
+  <%= link_to "Didn't receive unlock instructions?", new_unlock_path(resource_name) %><br />
+<% end -%>
+
+<%- if devise_mapping.omniauthable? %>
+  <%- resource_class.omniauth_providers.each do |provider| %>
+    <%= link_to "Sign in with #{provider.to_s.titleize}", omniauth_authorize_path(resource_name, provider) %><br />
+  <% end -%>
+<% end -%>0023:.:0:3:14=5098df04:16=5098df04:0031:unlocks:000000000:2:14=5098df04:16=5098df04:0036:new.html.erb:0000001a7:1:14=5098df04:16=5098df04:<h2>Resend unlock instructions</h2>
+
+<%= simple_form_for(resource, :as => resource_name, :url => unlock_path(resource_name), :html => { :method => :post }) do |f| %>
+  <%= f.error_notification %>
+
+  <div class="form-inputs">
+    <%= f.input :email, :required => true %>
+  </div>
+
+  <div class="form-actions">
+    <%= f.button :submit, "Resend unlock instructions" %>
+  </div>
+<% end %>
+
+<%= render "devise/shared/links" %>
+0023:.:0:3:14=5098df04:16=5098df04:0033:passwords:000000000:2:14=5098df04:16=5098df04:0037:edit.html.erb:00000027f:1:14=5098df04:16=5098df04:<h2>Change your password</h2>
+
+<%= simple_form_for(resource, :as => resource_name, :url => password_path(resource_name), :html => { :method => :put }) do |f| %>
+  <%= f.error_notification %>
+
+  <%= f.input :reset_password_token, :as => :hidden %>
+  <%= f.full_error :reset_password_token %>
+
+  <div class="form-inputs">
+    <%= f.input :password, :label => "New password", :required => true %>
+    <%= f.input :password_confirmation, :label => "Confirm your new password", :required => true %>
+  </div>
+
+  <div class="form-actions">
+    <%= f.button :submit, "Change my password" %>
+  </div>
+<% end %>
+
+<%= render "devise/shared/links" %>
+0036:new.html.erb:0000001ad:1:14=5098df04:16=5098df04:<h2>Forgot your password?</h2>
+
+<%= simple_form_for(resource, :as => resource_name, :url => password_path(resource_name), :html => { :method => :post }) do |f| %>
+  <%= f.error_notification %>
+
+  <div class="form-inputs">
+    <%= f.input :email, :required => true %>
+  </div>
+
+  <div class="form-actions">
+    <%= f.button :submit, "Send me reset password instructions" %>
+  </div>
+<% end %>
+
+<%= render "devise/shared/links" %>
+0023:.:0:3:14=5098df04:16=5098df04:0037:registrations:000000000:2:14=5098df04:16=5098df04:0037:edit.html.erb:00000039e:1:14=5098df04:16=5098df04:<h2>Edit <%= resource_name.to_s.humanize %></h2>
+
+<%= simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name), :html => { :method => :put }) do |f| %>
+  <%= f.error_notification %>
+
+  <div class="form-inputs">
+    <%= f.input :email, :required => true, :autofocus => true %>
+    <%= f.input :password, :autocomplete => "off", :hint => "leave it blank if you don't want to change it", :required => false %>
+    <%= f.input :password_confirmation, :required => false %>
+    <%= f.input :current_password, :hint => "we need your current password to confirm your changes", :required => true %>
+  </div>
+
+  <div class="form-actions">
+    <%= f.button :submit, "Update" %>
+  </div>
+<% end %>
+
+<h3>Cancel my account</h3>
+
+<p>Unhappy? <%= link_to "Cancel my account", registration_path(resource_name), :data => { :confirm => "Are you sure?" }, :method => :delete %>.</p>
+
+<%= link_to "Back", :back %>
+0036:new.html.erb:0000001e9:1:14=5098df04:16=5098df04:<h2>Sign up</h2>
+
+<%= simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name)) do |f| %>
+  <%= f.error_notification %>
+
+  <div class="form-inputs">
+    <%= f.input :email, :required => true, :autofocus => true %>
+    <%= f.input :password, :required => true %>
+    <%= f.input :password_confirmation, :required => true %>
+  </div>
+
+  <div class="form-actions">
+    <%= f.button :submit, "Sign up" %>
+  </div>
+<% end %>
+
+<%= render "devise/shared/links" %>
+0023:.:0:3:14=5098df04:16=5098df04:0032:sessions:000000000:2:14=5098e047:16=5098e047:0036:new.html.erb:0000001de:1:14=5098dfb5:16=5098dfb5:<%= simple_form_for(resource, :as => resource_name, :url => session_path(resource_name),:html=>{:class=>'form-horizontal'} ) do |f| %>
+  <div class="form-inputs">
+    <%= f.input :email, :required => false, :autofocus => true %>
+    <%= f.input :password, :required => false %>
+    <%= f.input :remember_me, :as => :boolean if devise_mapping.rememberable? %>
+  </div>
+
+  <div class="form-actions">
+    <%= f.button :submit, "登 录",:class=>"btn-primary" %>
+  </div>
+<% end %>
+0023:.:0:3:14=5098dfb5:16=5098dfb5:0030:mailer:000000000:2:14=5098df04:16=5098df04:004c:confirmation_instructions.html.erb:0000000e8:1:14=5098df04:16=5098df04:<p>Welcome <%= @resource.email %>!</p>
+
+<p>You can confirm your account email through the link below:</p>
+
+<p><%= link_to 'Confirm my account', confirmation_url(@resource, :confirmation_token => @resource.confirmation_token) %></p>
+0046:unlock_instructions.html.erb:000000127:1:14=5098df04:16=5098df04:<p>Hello <%= @resource.email %>!</p>
+
+<p>Your account has been locked due to an excessive amount of unsuccessful sign in attempts.</p>
+
+<p>Click the link below to unlock your account:</p>
+
+<p><%= link_to 'Unlock my account', unlock_url(@resource, :unlock_token => @resource.unlock_token) %></p>
+004e:reset_password_instructions.html.erb:0000001a8:1:14=5098df04:16=5098df04:<p>Hello <%= @resource.email %>!</p>
+
+<p>Someone has requested a link to change your password, and you can do this through the link below.</p>
+
+<p><%= link_to 'Change my password', edit_password_url(@resource, :reset_password_token => @resource.reset_password_token) %></p>
+
+<p>If you didn't request this, please ignore this email.</p>
+<p>Your password won't change until you access the link above and create a new one.</p>
+0023:.:0:3:14=5098df04:16=5098df04:0037:confirmations:000000000:2:14=5098df04:16=5098df04:0036:new.html.erb:0000001b9:1:14=5098df04:16=5098df04:<h2>Resend confirmation instructions</h2>
+
+<%= simple_form_for(resource, :as => resource_name, :url => confirmation_path(resource_name), :html => { :method => :post }) do |f| %>
+  <%= f.error_notification %>
+
+  <div class="form-inputs">
+    <%= f.input :email, :required => true %>
+  </div>
+
+  <div class="form-actions">
+    <%= f.button :submit, "Resend confirmation instructions" %>
+  </div>
+<% end %>
+
+<%= render "devise/shared/links" %>
+0023:.:0:3:14=5098df04:16=5098df04:0023:.:0:3:14=5098df04:16=5098df04:0030:cities:000000000:2:14=5098dbce:16=5098dbce:0039:_form.html.haml:00000014e:1:14=5098d86d:16=5098d86d:= form_for @city do |f|
+  - if @city.errors.any?
+    #error_explanation
+      %h2= "#{pluralize(@city.errors.count, "error")} prohibited this city from being saved:"
+      %ul
+        - @city.errors.full_messages.each do |msg|
+          %li= msg
+
+  .field
+    = f.label :name
+    = f.text_field :name
+  .actions
+    = f.submit 'Save'
+0039:index.html.haml:000000151:1:14=5098d86d:16=5098d86d:%h1 Listing cities
+
+%table
+  %tr
+    %th Name
+    %th
+    %th
+    %th
+
+  - @cities.each do |city|
+    %tr
+      %td= city.name
+      %td= link_to 'Show', city
+      %td= link_to 'Edit', edit_city_path(city)
+      %td= link_to 'Destroy', city, method: :delete, data: { confirm: 'Are you sure?' }
+
+%br
+
+= link_to 'New City', new_city_path
+0038:show.html.haml:00000007a:1:14=5098d86d:16=5098d86d:%p#notice= notice
+
+%p
+  %b Name:
+  = @city.name
+
+= link_to 'Edit', edit_city_path(@city)
+\|
+= link_to 'Back', cities_path
+0037:new.html.haml:00000003d:1:14=5098d86d:16=5098d86d:%h1 New city
+
+= render 'form'
+
+= link_to 'Back', cities_path
+0038:edit.html.haml:00000005c:1:14=5098d86d:16=5098d86d:%h1 Editing city
+
+= render 'form'
+
+= link_to 'Show', @city
+\|
+= link_to 'Back', cities_path
+0023:.:0:3:14=5098d86d:16=5098d86d:0031:layouts:000000000:2:14=5098df14:16=5098df14:003f:application.html.haml:000000126:1:14=5098d518:16=5098d518:!!!
+%html
+  %head
+    %title Kabam
+    %meta{"http-equiv" => "Content-Type", :content => "text/html; charset=utf-8"}           
+    = stylesheet_link_tag    "application", :media => "all"  
+    = javascript_include_tag "application" 
+    = csrf_meta_tags 
+  %body
+    .container
+      = yield
+
+003b:welcome.html.haml:0000001c8:1:14=5098d59c:16=5098d59c:!!!
+%html
+  %head
+    %title kabam             
+    = stylesheet_link_tag "application", :media => "all"
+  %body#login
+    #login-wrapper
+      #login-top
+        %h2 Kabam游戏登入        
+      #login-content
+        - unless flash[:alert].blank?   
+          .alert
+            %strong 警告       
+            = flash[:alert]    
+        - unless flash[:notice].blank?  
+          .alert.alert-info
+            = flash[:notice]   
+        = yield
+
+0023:.:0:3:14=5098d59c:16=5098d59c:0023:.:0:3:14=5098d59c:16=5098d59c:0023:.:0:3:14=5098d59c:16=5098d59c:002c:db:000000000:2:14=5098daa3:16=5098daa3:0031:migrate:000000000:2:14=5098da25:16=5098da25:004f:20121106090015_devise_create_users.rb:0000005ce:1:14=5098da25:16=5098da25:class DeviseCreateUsers < ActiveRecord::Migration
+  def change
+    create_table(:users) do |t|
+      ## Database authen
