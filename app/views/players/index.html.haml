@@ -11,7 +11,10 @@
         - @players.each do |player|
           %tr
             %td= player.email 
-            %td
-            %td= link_to '删除','#', :confirm => '确定删除该玩家?', :method => :delete
- 
+            %td= player.cities.count
+            %td= link_to '删除',"/players/#{player.id}", :confirm => '确定删除该玩家?', :method => :delete
+%br
+.row
+  .span12
+    = render 'form' 
 

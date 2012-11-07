@@ -4,8 +4,8 @@ Kabamgame::Application.routes.draw do
   devise_for :users
 
   get "/register"=>"players#index"  
-
-
+  post "/players"=>"players#create"
+  delete "/players/:id"=>"players#destroy"
   # The priority is based upon order of creation:
   # first created -> highest priority.
 

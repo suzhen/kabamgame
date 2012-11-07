@@ -1,19 +1,36 @@
-%h1 Listing cities
+.row
+  .span12
+    %h4 拥有城池列表
+    %table.table.table-striped
+      %thead
+        %tr
+          %th 城市名称
+          %th 城市坐标
+          %th 生产食物间隔（秒)
+          %th 税率
+          %th 人口数目
+          %th 金子
+          %th 食物
+          %th 首都标识
+          %th 创建时间
+          %th
+          %th
+          %th
+      %tbody
+        - @cities.each do |city|
+          %tr
+            %td= city.name
+            %td= city.coordinate 
+            %td= city.pfinterval
+            %td= city.taxrate.to_s+"%"
+            %td= city.population
+            %td= city.gold
+            %td= city.food
+            %td= city.capital ? "是":"否"
+            %td= city.created_at.to_s(:db)
+            %td= link_to '显示', city
+            %td= link_to '编辑', edit_city_path(city)
+            %td= link_to '删除', city, method: :delete, data: { confirm: '确定删除该城池?' }
 
-%table
-  %tr
-    %th Name
-    %th
-    %th
-    %th
-
-  - @cities.each do |city|
-    %tr
-      %td= city.name
-      %td= link_to 'Show', city
-      %td= link_to 'Edit', edit_city_path(city)
-      %td= link_to 'Destroy', city, method: :delete, data: { confirm: 'Are you sure?' }
-
-%br
-
-= link_to 'New City', new_city_path
+    %br
+      = link_to '新建城池', new_city_path

@@ -5,6 +5,7 @@ class ApplicationController < ActionController::Base
   
   def layout_by_resource       
      return "welcome" if controller_name=="sessions"
+     return "register" if controller_name == "players"
      "application"  
   end
 
@@ -20,17 +21,6 @@ class ApplicationController < ActionController::Base
 
 
   protect_from_forgery
-
-
-
-
-
-
-
-
-
-
-
 
 
 end

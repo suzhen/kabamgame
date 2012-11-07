@@ -8,7 +8,7 @@ class CreateCities < ActiveRecord::Migration
       t.integer :population,:default=>100 #人口数目
       t.integer :gold,:default=>0 #金子
       t.integer :food,:default=>0 #食物
-      t.integer :capital,:default=>false #首都标识
+      t.boolean :capital,:default=>false #首都标识
       t.references :user 
       t.timestamps
     end

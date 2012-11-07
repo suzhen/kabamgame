@@ -1,0 +1,10 @@
+= simple_form_for(@user,:url=>'/players',:html=>{:class=>'form-horizontal'}) do |f|
+  = f.error_notification       
+  
+  .form-inputs                 
+    = f.input :email            
+    = f.input :password,:as=>"password"           
+   
+  .form-actions                
+    = f.button :submit
+
