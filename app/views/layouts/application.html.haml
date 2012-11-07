@@ -8,5 +8,8 @@
     = csrf_meta_tags 
   %body
     .container
+      .row
+        .span12
+          = link_to "退出",destroy_user_session_path,:method=>"DELETE"
       = yield
 

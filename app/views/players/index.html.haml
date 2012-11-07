@@ -1,0 +1,17 @@
+.row
+  .span12
+    %table.table.table-striped
+      %thead
+        %tr
+          %th 用户名称
+          %th 城池数量
+          %th
+          %th
+      %tbody
+        - @players.each do |player|
+          %tr
+            %td= player.email 
+            %td
+            %td= link_to '删除','#', :confirm => '确定删除该玩家?', :method => :delete
+ 
+
