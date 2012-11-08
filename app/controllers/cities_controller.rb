@@ -110,12 +110,31 @@ class CitiesController < ApplicationController
     end
   end
   
-  def querytrain
+  def querytrain_ajax
+     @city=City.find(params[:id])
      @trainings = @city.get_training_status 
-     respond_to do |format|                       
-         format.html    
-         format.js
-     end           
   end
 
+  def finished_arm
+    @city=City.find(params[:city])
+
+
+    @city.finished_train_arm(   "#{params[:armtype]},#{params[:num]},#{params[:time]}"
+)
+    respond_to do |format|
+      format.js
+    end
+
+  end
+
+  def cancel_arm
+    @city=City.find(params[:city])
+    @city.cancel_train_arm("#{params[:armtype]},#{params[:num]},#{params[:time]}"
+)
+
+    respond_to do |format|
+      format.js
+    end
+
+  end
 end

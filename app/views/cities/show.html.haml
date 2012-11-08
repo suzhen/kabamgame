@@ -11,15 +11,25 @@
     %p
       %b 士兵训练状况：
       #train_progress
-        = render "trainprogress"
+    %p 
+      %b 拥兵情况:
+      %table.table.table-striped
+        %thead
+          %tr
+            %th 兵种
+            %th 数量
+        %tbody
+          - @city.arms.each do |arm|
+            %tr
+              %td= get_arm_type(arm.armtype)
+              %td= arm.num           
+       
 %br
 .row
   .span12
     = link_to '编辑', edit_city_path(@city)
     \|
     = link_to '返回城池列表', cities_path
-    \|
-    = link_to '征兵',"#"
 %br
 %br
 .row

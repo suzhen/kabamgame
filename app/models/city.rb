@@ -1,7 +1,7 @@
 require "redis"
 class City < ActiveRecord::Base
  belongs_to :user
-
+ has_many :arms
  def get_food_num()
   init_time
   less_hour_food = (self.pfinterval*@interval_second).to_i
@@ -110,10 +110,47 @@ Return $key;
     train_second=(Time.now-Time.at(arr_arm[2].to_i)).to_i
     {:armtype=>arr_arm[0],
      :num=>arr_arm[1],
-     :created_at=>Time.at(arr_arm[2].to_i)
-     :train_time=>train_second,
+     :created_at=>arr_arm[2],
+     :train_time=>train_less_time(arr_arm[0],train_second),
      :finished=>train_finish?(arr_arm[0],train_second)}
    end
+ end
+
+ #完成训练
+ def finished_train_arm(status)
+   arr_arm = status.split(',')
+   train_second=(Time.now-Time.at(arr_arm[2].to_i)).to_i
+   #写入arm表中
+   @arm=self.arms.where("armtype=#{arr_arm[0]}").first
+   if @arm.nil?
+      @arm=Arm.new :armtype=>arr_arm[0],:num=>arr_arm[1],:user_id=>self.user.id
+      self.arms<<@arm
+      
+   else
+      @arm.num+=arr_arm[1].to_i
+      @arm.save
+   end
+   #删除缓存
+   if train_finish?(arr_arm[0],train_second)
+     delete_queue_arm(status)
+     return true
+   else
+     return false
+   end
+ end 
+ 
+ #取消训练
+ def cancel_train_arm(status)
+   #删除缓存
+   arr_arm = status.split(',')
+   train_second=(Time.now-Time.at(arr_arm[2].to_i)).to_i
+   if train_finish?(arr_arm[0],train_second)
+        return false
+   else
+        delete_queue_arm(status) 
+        return true
+   end
+ 
  end
 
 
@@ -145,5 +182,19 @@ Return $key;
       end
    end
 
+   def train_less_time(armtype,train_second)
+      case armtype
+      when "1"
+        return train_second - 3*60
+      when "2"
+       return train_second - 12*60
+      when "3"
+       return train_second - 50*60
+      end
+   end
 
+   def delete_queue_arm(status)
+     init_redis
+     @redis.srem "queuearm#{self.id.to_s}",status 
+   end
 end

@@ -6,6 +6,8 @@ class ApplicationController < ActionController::Base
   def layout_by_resource       
      return "welcome" if controller_name=="sessions"
      return "register" if controller_name == "players"
+     return nil  if action_name[-5..-1]=="_ajax"
+
      "application"  
   end
 

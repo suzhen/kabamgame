@@ -12,7 +12,12 @@ Kabamgame::Application.routes.draw do
   get "/getgold"=>"cities#get_gold"
 
   post "/trainings"=>"cities#join_training"
+  
+  get "/queryqueuetrain/:id"=>"cities#querytrain_ajax"
+  get "/finishedarm/:armtype/:num/:time/:city"=>"cities#finished_arm"
+  get "/canceltrain/:armtype/:num/:time/:city"=>"cities#cancel_arm"
   # The priority is based upon order of creation:
+
   # first created -> highest priority.
 
   # Sample of regular route:

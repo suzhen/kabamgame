@@ -1,0 +1,18 @@
+%table.table.table-striped
+  %thead
+    %tr
+      %th 兵种
+      %th 个数
+      %th 训练进度
+      %th 操作
+  %tbody
+    - @trainings.each do |train|
+      %tr
+        %td
+          = get_arm_type(train[:armtype])
+        %td
+          = train[:num]
+        %td
+          = train[:finished] ? "完成" : "还有#{-train[:train_time]}秒完成"
+        %td
+          = train[:finished] ? link_to("入伍","/finishedarm/#{train[:armtype]}/#{train[:num]}/#{train[:created_at]}/#{@city.id.to_s}",:remote=>true) : link_to("取消","/canceltrain/#{train[:armtype]}/#{train[:num]}/#{train[:created_at]}/#{@city.id.to_s}",:remote=>true)
