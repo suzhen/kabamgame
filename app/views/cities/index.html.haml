@@ -1,5 +1,9 @@
 .row
   .span12
+    - unless notice.nil?
+      %p  
+        .alert.alert-success#notice= notice 
+
     %h4 拥有城池列表
     %table.table.table-striped
       %thead
@@ -19,7 +23,7 @@
       %tbody
         - @cities.each do |city|
           %tr
-            %td= city.name
+            %td= if city.capital then raw "<span style='color:red;font-weight:bold'>#{city.name}</span>" else city.name end
             %td= city.coordinate 
             %td= city.pfinterval
             %td= city.taxrate.to_s+"%"
@@ -34,3 +38,9 @@
 
     %br
       = link_to '新建城池', new_city_path
+      &nbsp;&nbsp;
+      = link_to '更新食物',"/getfood"
+      &nbsp;&nbsp;
+      = link_to '更新人口',"/getpopulation"
+      &nbsp;&nbsp;
+      = link_to '更新金子',"/getgold"

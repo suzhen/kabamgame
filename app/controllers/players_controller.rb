@@ -11,7 +11,6 @@ class PlayersController < ApplicationController
   end
 
   def create
-    params[:user]
     @user = User.new(params[:user])
 
     respond_to do |format|

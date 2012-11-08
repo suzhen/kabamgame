@@ -1,9 +1,25 @@
-%p#notice= notice
-
-%p
-  %b Name:
-  = @city.name
-
-= link_to 'Edit', edit_city_path(@city)
-\|
-= link_to 'Back', cities_path
+.row
+  .span12
+    - unless notice.nil?
+      %p  
+        .alert.alert-success#notice= notice 
+.row
+  .span12
+    %p
+      %b 城池名称:
+      = @city.name
+    %p
+      %b 士兵训练状况：
+%br
+.row
+  .span12
+    = link_to '编辑', edit_city_path(@city)
+    \|
+    = link_to '返回城池列表', cities_path
+    \|
+    = link_to '征兵',"#"
+%br
+%br
+.row
+  .span12
+    = render "levyform"

@@ -1,26 +1,29 @@
 en:
   simple_form:
-    "yes": 'Yes'
-    "no": 'No'
+    "yes": '是'
+    "no": '否'
     required:
-      text: 'required'
+      text: '必填'
       mark: '*'
-      # You can uncomment the line below if you need to overwrite the whole required html.
-      # When using html, text and mark won't be used.
-      # html: '<abbr title="required">*</abbr>'
     error_notification:
-      default_message: "Please review the problems below:"
-    # Labels and hints examples
-    # labels:
-    #   defaults:
-    #     password: 'Password'
-    #   user:
-    #     new:
-    #       email: 'E-mail to sign in.'
-    #     edit:
-    #       email: 'E-mail.'
-    # hints:
-    #   defaults:
-    #     username: 'User name to sign in.'
-    #     password: 'No special characters, please.'
+      default_message: "请注意以下问题："
+    labels:
+       defaults:
+         password: '密码'
+         remember_me: '记着我'
+       user:
+         new:
+           email: 'E-mail登陆'
+         edit:
+           email: 'E-mail.'
+       city:
+           name: '城池名称'
+           coordinate: '城市坐标'
+           pfinterval: '生产食物间隔（秒)'
+           taxrate: '税率'
+           population: '人口数目'
+           gold: '金子'
+           food: '食物'
+           capital: '首都标识'
+ 
 

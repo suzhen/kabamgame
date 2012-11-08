@@ -1,0 +1,17 @@
+= form_tag("/trainings",:class=>'form-horizontal') do 
+  .form-inputs      
+    = hidden_field_tag :city_id,@city.id.to_s
+    .control-group.select.required      
+      %label.select.control-label.required
+        兵种
+      .controls
+        = select_tag :armtype, options_for_select([['长枪兵','1'],['弓箭手','2'],['骑兵','3']])
+    .control-group.integer.optional 
+      %label.integer.optional.control-label
+        %abbr{:title=>"必填"} *
+        人数
+      .controls
+        = number_field_tag(:soldiersnum) 
+  .form-actions
+    = submit_tag "加入训练队列"
+

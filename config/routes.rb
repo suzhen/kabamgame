@@ -6,6 +6,12 @@ Kabamgame::Application.routes.draw do
   get "/register"=>"players#index"  
   post "/players"=>"players#create"
   delete "/players/:id"=>"players#destroy"
+
+  get "/getfood"=>"cities#get_food"
+  get "/getpopulation"=>"cities#get_population"
+  get "/getgold"=>"cities#get_gold"
+
+  post "/trainings"=>"cities#join_training"
   # The priority is based upon order of creation:
   # first created -> highest priority.
 

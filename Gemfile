@@ -7,6 +7,8 @@ gem 'rails', '3.2.2'
 
 #gem 'sqlite3'
 gem 'mysql2'
+gem 'redis'
+
 gem "kaminari"  
 gem 'execjs'
 gem 'therubyracer', :platforms => :ruby
