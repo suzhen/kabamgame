@@ -104,9 +104,16 @@ Return $key;
 
  def get_training_status
    init_redis
-   get_queuearm_count
-
-
+   @queue_set = @redis.smembers "queuearm#{self.id.to_s}"
+   @queue_set.map do |train|
+    arr_arm = train.split(',')
+    train_second=(Time.now-Time.at(arr_arm[2].to_i)).to_i
+    {:armtype=>arr_arm[0],
+     :num=>arr_arm[1],
+     :created_at=>Time.at(arr_arm[2].to_i)
+     :train_time=>train_second,
+     :finished=>train_finish?(arr_arm[0],train_second)}
+   end
  end
 
 
@@ -126,5 +133,17 @@ Return $key;
      @queue_set = @redis.smembers "queuearm#{self.id.to_s}" 
       @queue_set.length 
    end
+
+   def train_finish?(armtype,train_second)
+      case armtype
+      when "1"
+        return train_second >=  3*60
+      when "2"
+       return train_second >=  12*60
+      when "3"
+       return train_second >=  50*60
+      end
+   end
+
 
 end

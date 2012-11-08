@@ -16,6 +16,7 @@ class CitiesController < ApplicationController
   # GET /cities/1.json
   def show
     @city = City.find(params[:id])
+     @trainings = @city.get_training_status 
 
     respond_to do |format|
       format.html # show.html.erb
@@ -108,6 +109,13 @@ class CitiesController < ApplicationController
       redirect_to @city,:notice=>"加入训练队列失败。"
     end
   end
-
+  
+  def querytrain
+     @trainings = @city.get_training_status 
+     respond_to do |format|                       
+         format.html    
+         format.js
+     end           
+  end
 
 end
