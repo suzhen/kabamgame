@@ -166,9 +166,9 @@ class CitiesController < ApplicationController
     if @city.start_war(params[:fighter],params[:attackcity],params[:arm_ids])
       arr_arm.each do |arm|
         arm.armstatus="attack"
-        #arm.save
+        arm.save
       end
-      #@city.update_arm_cache
+      @city.update_arm_cache
       redirect_to @city,:notice=>"开始攻击！"
     else
       redirect_to @city,:notice=>"攻击失败,外面部队不能大于5！"
@@ -176,21 +176,43 @@ class CitiesController < ApplicationController
  end
 
  def fight_arm
-    params[:ackcityid]
-    params[:ref]
-    @city=City.find params[:cityid]
+    attack_city_id =  params[:key].split("_")[0]
+    defend_city_id = params[:ref].split("_")[0]
+    @attack_city=City.find attack_city_id
+    @defend_city=City.find defend_city_id
     arm_ids=[]
-    defend_arm_ids=@city.arms.where("armstatus='nor'").map {|arm| arm.id.to_s}
-    attack_arm_ids=params[:ids].split("_")
+    defend_arm_ids=@defend_city.arms.where("armstatus='nor'").map {|arm| arm.id.to_s}
+    attack_arm_ids=params[:ids].split(",")
     arm_ids=defend_arm_ids+attack_arm_ids
+   
+    #p "战斗人员"+arm_ids.join(",")
 
-    p "*********8"
-   p arm_ids
+    #开战,得到幸存人员
+    survivei_arm_ids=Arm.black_box(arm_ids)
+    attack_survivei_arm_ids=survivei_arm_ids&attack_arm_ids
+    #p "幸存人员"+survivei_arm_ids.join(",")
+    #p "攻方人员"+attack_arm_ids.join(",")
+    #p "攻方幸存人员"+attack_survivei_arm_ids.join(",")
+    #删除死亡士兵
+    dead_arm_ids = arm_ids - survivei_arm_ids 
+    #p "死亡士兵"+dead_arm_ids.join(",")
+
+    #Arm.find(dead_arm_ids).destroy_all()
   
-    #@city.finished_defend(params[:key])
+    @attack_city.finished_attack(params[:ref],attack_survivei_arm_ids.join(',')) 
+    @defend_city.finished_defend(params[:key])
     respond_to do |format|
       format.js
     end
  end
+
+ def back_city
+    params[:cityid]
+    params[:key] 
+    respond_to do |format|
+      format.js
+    end
+ end
+
 
 end

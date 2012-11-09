@@ -9,6 +9,8 @@ class Arm < ActiveRecord::Base
   BOWMANSPEED = 2
   CAVALRYMANSPEED = 10
 
+  SURVIVEIRATE = 0.5
+
   def self.waste_food(created_at,armtype)
       age = (Time.now - created_at).to_i
       case armtype
@@ -38,9 +40,22 @@ class Arm < ActiveRecord::Base
       end
   end
   
-  def self.black_box(arm_ids)
-
-
+  def self.black_box(arr_arm)
+    solidercount = arr_arm.length
+    return arr_arm if solidercount==1
+    survivei_solidercount = (solidercount * SURVIVEIRATE).to_i  
+    tmp = Array.new
+    arr_survivei_arm = Array.new
+    survivei_solidercount.times do |i|
+       r = rand(solidercount)
+      if tmp[r]!=1                              
+       arr_survivei_arm << arr_arm[r]
+       tmp[r]=1                                
+      else                                      
+        redo                                    
+      end                  
+    end    
+    arr_survivei_arm
   end
 
 end

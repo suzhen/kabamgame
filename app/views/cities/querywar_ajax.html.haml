@@ -10,6 +10,7 @@
         %th 回城时间
         %th 士兵ID
         %th 状态
+        %th 操作
     %tbody
       - @order = 0
       - @warcache.each do |war|
@@ -23,5 +24,6 @@
           %td= war[:back_time]
           %td= war[:arm_ids]
           %td= get_war_status(war[:status])
+          %td= link_to("回城","/backcity/#{@city.id.to_s}/#{war[:key]}",:remote=>true) if war[:status]=="back"
 
  

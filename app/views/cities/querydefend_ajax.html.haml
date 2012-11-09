@@ -16,4 +16,4 @@
           %td= defend[:user_id]
           %td= defend[:city_id]
           %td= defend[:arm_ids]
-          %td= link_to "迎战","/fightarm/#{@city.id.to_s}/#{defend[:city_id]}/#{defend[:arm_ids].sub(",","_")}/#{defend[:ref]}/#{defend[:key]}",:remote=>true
+          %td= link_to "迎战","/fightarm/#{defend[:arm_ids]}/#{defend[:ref]}/#{defend[:key]}",:remote=>true

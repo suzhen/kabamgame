@@ -24,8 +24,8 @@ Kabamgame::Application.routes.draw do
   get "/canceltrain/:armtype/:num/:time/:city"=>"cities#cancel_arm"
 
   post "/attackcity"=>"cities#attack_city"
-  get "/fightarm/:cityid/:ackcityid/:ids/:ref/:key"=>"cities#fight_arm"
-
+  get "/fightarm/:ids/:ref/:key"=>"cities#fight_arm"
+  get "/backcity/:cityid/:key"=>"cities#back_city"
   # The priority is based upon order of creation:
 
   # first created -> highest priority.

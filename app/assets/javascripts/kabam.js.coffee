@@ -1,5 +1,5 @@
 $ ->
-  _speed=10000
+  _speed=3000
   getQueuetrain=(cityId)->
      $.ajax
         url: '/queryqueuetrain/'+cityId

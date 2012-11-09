@@ -10,6 +10,8 @@
     .container
       .row
         .span12
+          %b
+          = "欢迎#{current_user.email}来玩游戏"
           = link_to "退出",destroy_user_session_path,:method=>"DELETE"
       = yield
 

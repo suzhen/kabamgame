@@ -2,11 +2,11 @@
   = f.error_notification       
   
   .form-inputs                 
-    = f.input :name 
+    = f.input :name
+    = f.input :coordinate,:as=>:integer
     - unless @city.new_record?
       = f.input :taxrate           
       = f.input :capital
-      = f.input :coordinate 
   .form-actions                
     = f.button :submit
 
