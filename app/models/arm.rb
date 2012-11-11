@@ -37,5 +37,10 @@ class Arm < ActiveRecord::Base
        return  CAVALRYMANSPEED
       end
   end
+  
+  def self.black_box(arm_ids)
+
+
+  end
 
 end

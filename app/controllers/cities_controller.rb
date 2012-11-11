@@ -125,6 +125,11 @@ class CitiesController < ApplicationController
    @warcache=@city.get_war_list   
   end
 
+  def querydefend_ajax
+    @city=City.find(params[:id])
+    @defendcache=@city.get_defend_list   
+  end
+
 
   def finished_arm
     @city=City.find(params[:city])
@@ -153,21 +158,39 @@ class CitiesController < ApplicationController
     @city=City.find params[:start_city_id]
     if  !params[:attackcity].present?||!params[:arm_ids].present?
       redirect_to @city,:notice=>"攻击失败，缺少参数！"
-
     end
 
-   arr_arm_id = params[:arm_ids].split(",")
-   arr_arm = Arm.find(arr_arm_id.map{|id| id.to_i })
+    arr_arm_id = params[:arm_ids].split(",")
+    arr_arm = Arm.find(arr_arm_id.map{|id| id.to_i })
 
-  if @city.start_war(params[:fighter],params[:attackcity],params[:arm_ids])
-   arr_arm.each do |arm|
-      arm.armstatus="attack"
-      #arm.save
-   end
-   #@city.update_arm_cache
-  end
-   redirect_to @city,:notice=>"开始攻击！"
+    if @city.start_war(params[:fighter],params[:attackcity],params[:arm_ids])
+      arr_arm.each do |arm|
+        arm.armstatus="attack"
+        #arm.save
+      end
+      #@city.update_arm_cache
+      redirect_to @city,:notice=>"开始攻击！"
+    else
+      redirect_to @city,:notice=>"攻击失败,外面部队不能大于5！"
+    end
  end
 
+ def fight_arm
+    params[:ackcityid]
+    params[:ref]
+    @city=City.find params[:cityid]
+    arm_ids=[]
+    defend_arm_ids=@city.arms.where("armstatus='nor'").map {|arm| arm.id.to_s}
+    attack_arm_ids=params[:ids].split("_")
+    arm_ids=defend_arm_ids+attack_arm_ids
+
+    p "*********8"
+   p arm_ids
+  
+    #@city.finished_defend(params[:key])
+    respond_to do |format|
+      format.js
+    end
+ end
 
 end

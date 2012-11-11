@@ -208,7 +208,17 @@ class City < ActiveRecord::Base
    attack[:arm_ids] = arm_ids
    attack[:status] = attack_status
    attack[:back_time] = back_time
-   return @redis.hmset hkey,"#{city_id}_#{start_time}",attack.to_json
+   @redis.hsetnx hkey,"#{city_id}_#{start_time}",attack.to_json
+  
+   dkey = "defend_#{city_id}"
+   defend=Hash.new 
+   defend[:city_id]=self.id
+   defend[:user_id]=self.user.id
+   defend[:attack_time]=attack_time
+   defend[:arm_ids]=arm_ids
+   defend[:ref]= "#{city_id}_#{start_time}"
+   @redis.hsetnx dkey,"#{self.id.to_s}_#{start_time}",defend.to_json
+   true
   end
 
   #获取战争状况
@@ -219,13 +229,19 @@ class City < ActiveRecord::Base
      j = ActiveSupport::JSON
      @attacks = @redis.hkeys(hkey)
      @task = []
-     @attacks.each do |attack|
-        attack_str =  @redis.hget(hkey,attack)
+     @attacks.each do |attackfield|
+        attack_str =  @redis.hget(hkey,attackfield)
         attack = j.decode(attack_str)
+        attack_less_time = (Time.at(attack["attack_time"].to_i)-Time.now).to_i
+        attack_less_time = 0 if attack_less_time<=0
+        if attack_less_time == 0
+          attack["status"]="fight"
+         @redis.hset hkey,attackfield,attack.to_json
+        end
         @task <<  {:user_id => attack["user_id"],
                    :city_id => attack["city_id"],
                    :start_time => Time.at(attack["start_time"].to_i).to_s(:db),
-                   :attack_time => Time.at(attack["attack_time"].to_i).to_s(:db),
+                   :attack_time => "#{Time.at(attack["attack_time"].to_i).to_s(:db)} #{attack_less_time.to_s}s",
                    :arm_ids => attack["arm_ids"],
                    :status =>  attack["status"],
                    :back_time =>  attack["back_time"]}
@@ -234,7 +250,47 @@ class City < ActiveRecord::Base
   end
 
 
- private
+  #获取防守情况
+  def get_defend_list
+     init_redis
+     dkey = "defend_#{self.id.to_s}"
+     return nil if !@redis.exists dkey
+     j = ActiveSupport::JSON
+     @defends = @redis.hkeys(dkey)
+     @task = []
+     @defends.each do |defendfield|
+        defend_str =  @redis.hget(dkey,defendfield)
+        defend = j.decode(defend_str)
+        attack_less_time = (Time.at(defend["attack_time"].to_i)-Time.now).to_i
+        attack_less_time = 0 if attack_less_time<=0
+        if attack_less_time == 0
+          @task <<  {:user_id => defend["user_id"],
+                     :city_id => defend["city_id"],
+                     :ref => defend["ref"],
+                     :key => defendfield,
+                     :arm_ids => defend["arm_ids"]}
+        end
+     end 
+     @task
+  end
+
+  #完成一次防守
+  def finished_defend(defendfield)
+     init_redis
+    return  @redis.hdel "defend_#{self.id.to_s}",defendfield     
+  end
+
+  #完成一次进攻
+  def finished_attack(attack_city_id,attackfield,ids)
+    #hkey
+    #if ids==""
+    #  @redis.hdel "attack_#{self.id.to_s}",attackfield     
+    #end
+
+  end
+
+ 
+private
    
    def init_time
       @interval_time = Time.now-self.created_at;

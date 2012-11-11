@@ -1,5 +1,5 @@
 $ ->
-  _speed=3000
+  _speed=10000
   getQueuetrain=(cityId)->
      $.ajax
         url: '/queryqueuetrain/'+cityId
@@ -36,6 +36,14 @@ $ ->
            $("#war_list").html data
        
 
+  getDefendlist=(cityId)->
+    $.ajax
+        url: '/querydefendlist/'+cityId
+        type: 'GET'
+        error: (jqXHR, textStatus, errorThrown) ->
+           alert "数据读取有误，请稍后再试。"
+        success: (data, textStatus, jqXHR) ->
+           $("#defend_list").html data
 
 
 
@@ -46,6 +54,7 @@ $ ->
         getQueuetrain cityId       
         getArmlist cityId
         getWarlist cityId
+        getDefendlist cityId
 
    setInterval(updateTrainQueue,_speed)
    true
