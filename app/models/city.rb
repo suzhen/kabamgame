@@ -7,6 +7,17 @@ class City < ActiveRecord::Base
   less_hour_food = (self.pfinterval*@interval_second).to_i
   hour_food = self.capital ? @interval_hour*10000 : @interval_hour*1000
   @food_num= hour_food + less_hour_food
+  @food_num = yield(@food_num) if block_given? 
+  @food_num = 0  if @food_num < 0
+  if @food_num ==0 && self.food ==0
+     #消耗各兵种10%
+     desc1 = (count_solider("1")*0.1).to_i
+     desc2 = (count_solider("2")*0.1).to_i
+     desc3 = (count_solider("3")*0.1).to_i
+     waste_arm("1",desc1) if desc1>0    
+     waste_arm("2",desc2) if desc2>0     
+     waste_arm("3",desc3) if desc3>0     
+  end
   #更新食物的数量
   self.food=@food_num 
   self.save
@@ -45,73 +56,54 @@ class City < ActiveRecord::Base
  end
 
  def join_training(armtype,soldiers)
+    #格式："兵种,数量,开始时间"
    init_redis
-   if get_queuearm_count>=5
+   @len = get_queuearm_count
+   @now= Time.now
+   if @len>=5
      return false   
    else
-      @redis.sadd "queuearm#{self.id.to_s}","#{armtype},#{soldiers},#{Time.now.to_i}"
-      return true
-   end
-=begin
-//查看是否多于5批次
-  If($redis->get($queuearm)>=5){
-    Exit(‘同时训练不能大于5批次’);
-}
-  Switch($armtype){
-    Case 1 :
-      //长枪兵
-      If($city_gold>=1){
-      $city_gold = $city_gold-1;
-      //更新数据库的city_gold
-      $key = “queue_1_$user_id_$city_id_time”
-$redis->hMset($key,array(‘num’=>$num));
-$redis->incr($queuearm);
-}else{
-  Exit(‘金钱不够’)
-}
-    Break;
-    Case 2 :
-      //弓箭手
-      If($city_gold>=3){
-      $city_gold = $city_gold-3;
-      //更新数据库的city_gold
-      $key = “queue_2_$user_id_$city_id_time”;
-$redis->hMset($key,array(‘num’=>$num));
-$redis->incr($queuearm);
-}else{
-  Exit(‘金钱不够’)
-}
-    Break;
+     return false if !levy(armtype,soldiers.to_i) || !waste_population(soldiers.to_i)
 
-    Case 3 :
-      //骑兵
-      If($city_gold>=10){
-      $city_gold = $city_gold-10;
-      //更新数据库的city_gold
-      $key = queue_3_$user_id_$city_id_time;
-$redis->hMset($key,array(‘num’=>$num));
-$redis->incr($queuearm);
-}else{
-  Exit(‘金钱不够’)
-}
-    Break;
-    
-}
-Return $key;
-=end
+     arr_pre_arm = @len == 0 ? nil : @redis.lindex("queuearm#{self.id.to_s}",@len-1).split(',')
+     pre_train_second = (@now-Time.at(arr_pre_arm[2].to_i)).to_i unless arr_pre_arm.nil?
+     #当前时间-开始训练时间
+     #<没有开始
+     #>=0 已经开始，但未确定是否完成
+     if @len==0 || train_finish?(arr_pre_arm[0],pre_train_second)
+      @redis.rpush "queuearm#{self.id.to_s}","#{armtype},#{soldiers},#{@now.to_i}"
+     else
+      if !train_finish?(arr_pre_arm[0],pre_train_second)
+         if pre_train_second<0
+            #还未开始
+            @redis.rpush "queuearm#{self.id.to_s}","#{armtype},#{soldiers},#{arr_pre_arm[2].to_i+train_waste_time(armtype)}"
+         else
+            #已经开始
+            @redis.rpush "queuearm#{self.id.to_s}","#{armtype},#{soldiers},#{@now.to_i+train_less_time(arr_pre_arm[0],pre_train_second) }"
+         end
+      end
+     end
+     return true
+   end
  
  end
 
  def get_training_status
    init_redis
-   @queue_set = @redis.smembers "queuearm#{self.id.to_s}"
-   @queue_set.map do |train|
-    arr_arm = train.split(',')
-    train_second=(Time.now-Time.at(arr_arm[2].to_i)).to_i
+   return nil unless @redis.exists("queuearm#{self.id.to_s}")
+   @queue_len = get_queuearm_count 
+   @queue_len.times.map do |i|
+    arr_arm = @redis.lindex("queuearm#{self.id.to_s}",i).split(',')
+    arr_pre_arm = i>0 ? @redis.lindex("queuearm#{self.id.to_s}",i-1).split(',') : nil
+    train_second = (Time.now-Time.at(arr_arm[2].to_i)).to_i
+    pre_train_second = (Time.now-Time.at(arr_pre_arm[2].to_i)).to_i unless arr_pre_arm.nil?
+   #p "arr_arm:"+arr_arm.to_s
+   #p "arr_pre_arm:"+arr_pre_arm.to_s unless arr_pre_arm.nil?
     {:armtype=>arr_arm[0],
      :num=>arr_arm[1],
      :created_at=>arr_arm[2],
      :train_time=>train_less_time(arr_arm[0],train_second),
+     :started=> (i==0 ? true : train_second >= 0),
      :finished=>train_finish?(arr_arm[0],train_second)}
    end
  end
@@ -121,15 +113,12 @@ Return $key;
    arr_arm = status.split(',')
    train_second=(Time.now-Time.at(arr_arm[2].to_i)).to_i
    #写入arm表中
-   @arm=self.arms.where("armtype=#{arr_arm[0]}").first
-   if @arm.nil?
-      @arm=Arm.new :armtype=>arr_arm[0],:num=>arr_arm[1],:user_id=>self.user.id
-      self.arms<<@arm
-      
-   else
-      @arm.num+=arr_arm[1].to_i
-      @arm.save
-   end
+    arr_arm[1].to_i.times do |i|
+        @arm=Arm.new :armtype=>arr_arm[0],:user_id=>self.user.id
+        self.arms<<@arm
+    end
+  #更新缓存
+    update_arm_cache
    #删除缓存
    if train_finish?(arr_arm[0],train_second)
      delete_queue_arm(status)
@@ -153,6 +142,36 @@ Return $key;
  
  end
 
+ #获取部队缓存
+ def get_arm_cache
+     init_redis
+     return nil unless  @redis.exists "armlist#{self.id.to_s}"
+     len= @redis.llen "armlist#{self.id.to_s}"
+     @armcache = len.times.map do |i|
+       arr_arm =  @redis.lindex("armlist#{self.id.to_s}",i).split(",")
+       {:armtype=>arr_arm[1],
+        :id=>arr_arm[0],
+        :created_at=>arr_arm[2]} 
+     end
+     @armcache 
+  end
+
+   #部队消耗食物
+   def arm_waste_food
+     food=0
+     armcache = get_arm_cache
+     armcache.each do |arm|
+       food += Arm.waste_food(Time.at(arm[:created_at].to_i),arm[:armtype])
+     end unless armcache.nil?
+     food
+   end
+
+  #减少各兵种个数
+  def waste_arm(armtype,num)
+     self.arms.where(["armtype=?",armtype]).order("created_at").limit(num).destroy_all()
+     update_arm_cache
+  end
+
 
  private
    
@@ -165,13 +184,41 @@ Return $key;
    def init_redis
       @redis = Redis.new if @redis.nil?
    end
-
+   
+   #获取训练士兵批次
    def get_queuearm_count
-     @queue_set = @redis.smembers "queuearm#{self.id.to_s}" 
-      @queue_set.length 
+      @redis.llen "queuearm#{self.id.to_s}" 
    end
 
+   #征兵
+   def levy(armtype,num)
+      case armtype
+       when "1"
+        return waste_gold(num*1)
+       when "2"
+        return waste_gold(num*3)
+       when "3"
+        return waste_gold(num*10)
+       end
+   end
+
+
+   #各兵种训练需要花费的时间
+   def train_waste_time(armtype)
+      case armtype
+      when "1"
+        return 3*60
+      when "2"
+       return  12*60
+      when "3"
+       return  50*60
+      end
+   end
+
+
+   #判断训练是否完成
    def train_finish?(armtype,train_second)
+      return false if train_second<=0
       case armtype
       when "1"
         return train_second >=  3*60
@@ -181,20 +228,68 @@ Return $key;
        return train_second >=  50*60
       end
    end
-
+    
+   #获取训练剩余时间
    def train_less_time(armtype,train_second)
       case armtype
       when "1"
-        return train_second - 3*60
+        return  3*60 - train_second
       when "2"
-       return train_second - 12*60
+       return  12*60 - train_second
       when "3"
-       return train_second - 50*60
+       return  50*60 - train_second
+      end
+   end
+   
+   #删除训练队列
+   def delete_queue_arm(status)
+     init_redis
+     @redis.lrem "queuearm#{self.id.to_s}",0,status 
+   end
+
+   #更新军队缓存
+   def update_arm_cache
+      init_redis
+      @redis.del "armlist#{self.id.to_s}"
+      arms.order("created_at").each do |arm| 
+       @redis.rpush "armlist#{self.id.to_s}","#{arm.id.to_s},#{arm.armtype},#{arm.created_at.to_i}"
       end
    end
 
-   def delete_queue_arm(status)
-     init_redis
-     @redis.srem "queuearm#{self.id.to_s}",status 
+   #消耗城市金子
+   def waste_gold(wastegold)
+       if gold >= wastegold
+         self.gold = self.gold - wastegold 
+         self.save
+         return true
+        else
+         return false
+        end
    end
+   
+  #消耗城市人口
+  def waste_population(peoples)
+     if population >= peoples
+        self.population -= peoples 
+       self.save
+       return true
+     else
+       return false
+     end
+  end
+
+  #获取军队中各兵种的个数
+  def count_solider(armtype)
+    count=0
+    get_arm_cache.each do |arm|
+       count+=1 if arm[:armtype]==armtype
+    end
+  end
+
+  #计算去另一个城市的距离
+  def distance_city(city_id)
+    @city=City.find city_id
+    return (coordinate.to_i-@city.coordinate.to_i).abs
+  end
+
 end

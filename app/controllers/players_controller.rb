@@ -31,6 +31,10 @@ class PlayersController < ApplicationController
     @user.destroy()
     redirect_to "/register",notice:'删除成功。'
   end
-
+  
+  def cities_ajax
+    @user=User.find params[:id]
+    @cities=@user.cities.map {|city| [city.name,city.id]}
+  end
 
 end

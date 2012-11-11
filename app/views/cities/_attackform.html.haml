@@ -1,0 +1,25 @@
+= form_tag("/attackcity",:class=>'form-horizontal') do 
+  .form-inputs     
+    = hidden_field_tag :arm_ids
+    = hidden_field_tag :arm1count
+    = hidden_field_tag :arm2count
+    = hidden_field_tag :arm3count
+    .control-group.select.required      
+      %label.select.control-label.required
+        对手
+      .controls
+        - arr_user = User.where(["id!=?",current_user.id]).map{|user| [user.email,user.id] }
+        - arr_user.insert(0,["请选择",''])
+        = select_tag :fighter, options_for_select(arr_user)
+    .control-group.select.required      
+      %label.select.control-label.required
+        目标城市
+      .controls#acity
+    .control-group.integer.optional 
+      %label.integer.optional.control-label
+        兵种和人数
+      .controls#attackarm
+        
+  .form-actions
+    = submit_tag "进攻"
+

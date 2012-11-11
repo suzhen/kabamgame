@@ -13,17 +13,7 @@
       #train_progress
     %p 
       %b 拥兵情况:
-      %table.table.table-striped
-        %thead
-          %tr
-            %th 兵种
-            %th 数量
-        %tbody
-          - @city.arms.each do |arm|
-            %tr
-              %td= get_arm_type(arm.armtype)
-              %td= arm.num           
-       
+      #arm_list
 %br
 .row
   .span12
@@ -33,5 +23,7 @@
 %br
 %br
 .row
-  .span12
+  .span6
     = render "levyform"
+  .span6
+    = render "attackform"  

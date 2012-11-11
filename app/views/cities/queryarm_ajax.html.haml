@@ -1,0 +1,33 @@
+- unless @armcache.nil?
+  %table.table.table-striped
+    %thead
+      %tr
+        %th 顺序
+        %th 选择 
+        %th 士兵ID
+        %th 兵种
+        %th 创建时间
+        %th 消耗食物
+    %tbody
+      - @order=@arm1=@arm2=@arm3=@food=@waste=0
+      - @armcache.each do |arm|
+        - @order+=1
+        - @waste=Arm.waste_food(Time.at(arm[:created_at].to_i),arm[:armtype])
+        - @food+=@waste
+        - case arm[:armtype]
+        - when "1"
+          - @arm1+=1
+        - when "2"
+          - @arm2+=1
+        - when "3"
+          - @arm3+=1
+        %tr
+          %td= @order
+          %td= raw "<input name='cac'  type='checkbox' value=#{arm[:id]} onclick='choseArm(#{arm[:id]},#{arm[:armtype]},this)'>"
+          %td= arm[:id]
+          %td= get_arm_type(arm[:armtype])
+          %td= Time.at(arm[:created_at].to_i).to_s(:db) 
+          %td= @waste 
+  %hr
+    %span 
+      = "共计长枪兵有#{@arm1.to_s}人，弓箭手有#{@arm2.to_s}人，骑兵有#{@arm3.to_s}人，消耗食物#{@food}"

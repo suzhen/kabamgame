@@ -14,8 +14,14 @@ Kabamgame::Application.routes.draw do
   post "/trainings"=>"cities#join_training"
   
   get "/queryqueuetrain/:id"=>"cities#querytrain_ajax"
+  get "/queryarmlist/:id"=>"cities#queryarm_ajax"
+
+  get "/citiesforuser/:id"=>"players#cities_ajax"
+
   get "/finishedarm/:armtype/:num/:time/:city"=>"cities#finished_arm"
   get "/canceltrain/:armtype/:num/:time/:city"=>"cities#cancel_arm"
+
+  post "/attackcity"=>"cities#attack_city"
   # The priority is based upon order of creation:
 
   # first created -> highest priority.

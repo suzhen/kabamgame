@@ -85,7 +85,7 @@ class CitiesController < ApplicationController
   end
 
   def get_food
-    current_user.cities.each{|city| city.get_food_num()}
+    current_user.cities.each{|city| city.get_food_num(){|food|food-city.arm_waste_food() }   }
 
     redirect_to ("/cities")
   end
@@ -112,7 +112,12 @@ class CitiesController < ApplicationController
   
   def querytrain_ajax
      @city=City.find(params[:id])
-     @trainings = @city.get_training_status 
+     @trainings = @city.get_training_status
+  end
+
+  def queryarm_ajax
+    @city=City.find(params[:id])
+    @armcache=@city.get_arm_cache
   end
 
   def finished_arm
@@ -137,4 +142,11 @@ class CitiesController < ApplicationController
     end
 
   end
+
+ def attack_city
+
+
+ end
+
+
 end
