@@ -144,6 +144,22 @@ class CitiesController < ApplicationController
   end
 
  def attack_city
+    @city=City.find params[:start_city_id]
+    if  !params[:attackcity].present?||!params[:arm_ids].present?
+      redirect_to @city,:notice=>"攻击失败，缺少参数！"
+
+    end
+
+   arr_arm_id = params[:arm_ids].split(",")
+
+   Arm.find(params[:arm_ids]).each do |arm|
+      arm.armstatus="attack"
+      arm.save
+   end
+
+    redirect_to @city,:notice=>"开始攻击！"
+
+
 
 
  end

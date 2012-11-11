@@ -151,7 +151,8 @@ class City < ActiveRecord::Base
        arr_arm =  @redis.lindex("armlist#{self.id.to_s}",i).split(",")
        {:armtype=>arr_arm[1],
         :id=>arr_arm[0],
-        :created_at=>arr_arm[2]} 
+        :created_at=>arr_arm[2],
+        :armstatus=>arr_arm[3]} 
      end
      @armcache 
   end
@@ -171,6 +172,12 @@ class City < ActiveRecord::Base
      self.arms.where(["armtype=?",armtype]).order("created_at").limit(num).destroy_all()
      update_arm_cache
   end
+
+  #进攻时间
+  def attack_time(city_id,arm_ids)
+    return   Time.at Time.now.to_i+waste_second_to_city(city_id,arm_ids)
+  end
+
 
 
  private
@@ -252,7 +259,7 @@ class City < ActiveRecord::Base
       init_redis
       @redis.del "armlist#{self.id.to_s}"
       arms.order("created_at").each do |arm| 
-       @redis.rpush "armlist#{self.id.to_s}","#{arm.id.to_s},#{arm.armtype},#{arm.created_at.to_i}"
+       @redis.rpush "armlist#{self.id.to_s}","#{arm.id.to_s},#{arm.armtype},#{arm.created_at.to_i},#{arm.armstatus}"
       end
    end
 
@@ -291,5 +298,11 @@ class City < ActiveRecord::Base
     @city=City.find city_id
     return (coordinate.to_i-@city.coordinate.to_i).abs
   end
+
+  #计算去另一个城市的花费时间（秒）
+  def waste_second_to_city(city_id,arm_ids)
+    return ((distance_city(city_id)/ Arm.lowst_speed(self.id,arm_ids))*60).to_i
+  end
+
 
 end
