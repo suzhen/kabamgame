@@ -1,0 +1,27 @@
+- unless @warcache.nil?
+  %table.table.table-striped
+    %thead
+      %tr
+        %th 顺序
+        %th 进攻玩家
+        %th 进攻城市
+        %th 出兵时间
+        %th 攻击时间
+        %th 回城时间
+        %th 士兵ID
+        %th 状态
+    %tbody
+      - @order = 0
+      - @warcache.each do |war|
+        - @order+=1
+        %tr
+          %td= @order
+          %td= war[:user_id]
+          %td= war[:city_id]
+          %td= war[:start_time]
+          %td= war[:attack_time]
+          %td= war[:back_time]
+          %td= war[:arm_ids]
+          %td= get_war_status(war[:status])
+
+ 

@@ -15,6 +15,7 @@ Kabamgame::Application.routes.draw do
   
   get "/queryqueuetrain/:id"=>"cities#querytrain_ajax"
   get "/queryarmlist/:id"=>"cities#queryarm_ajax"
+  get "/querywarlist/:id"=>"cities#querywar_ajax"
 
   get "/citiesforuser/:id"=>"players#cities_ajax"
 

@@ -26,12 +26,26 @@ $ ->
               if $.inArray(chk.value,arr_armid)!=-1
                 $(chk).attr("checked","checked")
 
+  getWarlist=(cityId)->
+     $.ajax
+        url: '/querywarlist/'+cityId
+        type: 'GET'
+        error: (jqXHR, textStatus, errorThrown) ->
+           alert "数据读取有误，请稍后再试。"
+        success: (data, textStatus, jqXHR) ->
+           $("#war_list").html data
+       
+
+
+
+
   updateTrainQueue=() ->
      #更新训练状态
      if $("#train_progress").val()!=undefined && $("#city_id").val()!=undefined
         cityId = $("#city_id").val()
         getQueuetrain cityId       
         getArmlist cityId
+        getWarlist cityId
 
    setInterval(updateTrainQueue,_speed)
    true

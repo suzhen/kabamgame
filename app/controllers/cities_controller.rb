@@ -120,6 +120,12 @@ class CitiesController < ApplicationController
     @armcache=@city.get_arm_cache
   end
 
+  def querywar_ajax
+   @city=City.find(params[:id])
+   @warcache=@city.get_war_list   
+  end
+
+
   def finished_arm
     @city=City.find(params[:city])
 
@@ -151,17 +157,16 @@ class CitiesController < ApplicationController
     end
 
    arr_arm_id = params[:arm_ids].split(",")
+   arr_arm = Arm.find(arr_arm_id.map{|id| id.to_i })
 
-   Arm.find(params[:arm_ids]).each do |arm|
+  if @city.start_war(params[:fighter],params[:attackcity],params[:arm_ids])
+   arr_arm.each do |arm|
       arm.armstatus="attack"
-      arm.save
+      #arm.save
    end
-
-    redirect_to @city,:notice=>"开始攻击！"
-
-
-
-
+   #@city.update_arm_cache
+  end
+   redirect_to @city,:notice=>"开始攻击！"
  end
 
 

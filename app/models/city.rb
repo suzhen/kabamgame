@@ -1,4 +1,5 @@
 require "redis"
+require "json"
 class City < ActiveRecord::Base
  belongs_to :user
  has_many :arms
@@ -55,6 +56,7 @@ class City < ActiveRecord::Base
    @gold
  end
 
+ #训练士兵
  def join_training(armtype,soldiers)
     #格式："兵种,数量,开始时间"
    init_redis
@@ -87,7 +89,8 @@ class City < ActiveRecord::Base
    end
  
  end
-
+  
+ #获取训练情况
  def get_training_status
    init_redis
    return nil unless @redis.exists("queuearm#{self.id.to_s}")
@@ -157,6 +160,15 @@ class City < ActiveRecord::Base
      @armcache 
   end
 
+   #更新军队缓存
+   def update_arm_cache
+      init_redis
+      @redis.del "armlist#{self.id.to_s}"
+      arms.order("created_at").each do |arm| 
+       @redis.rpush "armlist#{self.id.to_s}","#{arm.id.to_s},#{arm.armtype},#{arm.created_at.to_i},#{arm.armstatus}"
+      end
+   end
+
    #部队消耗食物
    def arm_waste_food
      food=0
@@ -178,6 +190,48 @@ class City < ActiveRecord::Base
     return   Time.at Time.now.to_i+waste_second_to_city(city_id,arm_ids)
   end
 
+  #参战
+  def start_war(user_id,city_id,arm_ids)
+    init_redis
+    hkey = "attack_#{self.id.to_s}"
+   #>5不能参战
+   return false if @redis.exists(hkey)&&@redis.hkeys(hkey).length>=5
+   start_time = Time.now.to_i
+   attack_time = start_time + waste_second_to_city(city_id,arm_ids)
+   attack_status="attack"
+   back_time=0
+   attack=Hash.new
+   attack[:user_id] = user_id
+   attack[:city_id] = city_id
+   attack[:start_time] = start_time
+   attack[:attack_time] = attack_time
+   attack[:arm_ids] = arm_ids
+   attack[:status] = attack_status
+   attack[:back_time] = back_time
+   return @redis.hmset hkey,"#{city_id}_#{start_time}",attack.to_json
+  end
+
+  #获取战争状况
+  def get_war_list
+     init_redis
+     hkey = "attack_#{self.id.to_s}"
+     return nil if !@redis.exists hkey
+     j = ActiveSupport::JSON
+     @attacks = @redis.hkeys(hkey)
+     @task = []
+     @attacks.each do |attack|
+        attack_str =  @redis.hget(hkey,attack)
+        attack = j.decode(attack_str)
+        @task <<  {:user_id => attack["user_id"],
+                   :city_id => attack["city_id"],
+                   :start_time => Time.at(attack["start_time"].to_i).to_s(:db),
+                   :attack_time => Time.at(attack["attack_time"].to_i).to_s(:db),
+                   :arm_ids => attack["arm_ids"],
+                   :status =>  attack["status"],
+                   :back_time =>  attack["back_time"]}
+     end 
+     @task
+  end
 
 
  private
@@ -254,14 +308,6 @@ class City < ActiveRecord::Base
      @redis.lrem "queuearm#{self.id.to_s}",0,status 
    end
 
-   #更新军队缓存
-   def update_arm_cache
-      init_redis
-      @redis.del "armlist#{self.id.to_s}"
-      arms.order("created_at").each do |arm| 
-       @redis.rpush "armlist#{self.id.to_s}","#{arm.id.to_s},#{arm.armtype},#{arm.created_at.to_i},#{arm.armstatus}"
-      end
-   end
 
    #消耗城市金子
    def waste_gold(wastegold)

@@ -8,6 +8,7 @@
         %th 兵种
         %th 创建时间
         %th 消耗食物
+        %th 状态
     %tbody
       - @order=@arm1=@arm2=@arm3=@food=@waste=0
       - @armcache.each do |arm|
@@ -23,11 +24,12 @@
           - @arm3+=1
         %tr
           %td= @order
-          %td= raw "<input name='cac'  type='checkbox' value=#{arm[:id]} onclick='choseArm(#{arm[:id]},#{arm[:armtype]},this)'>"
+          %td= raw "<input name='cac'  type='checkbox' value=#{arm[:id]} #{ "disabled='disabled'" if arm[:armstatus]=="attack"  } onclick='choseArm(#{arm[:id]},#{arm[:armtype]},this)'>"
           %td= arm[:id]
           %td= get_arm_type(arm[:armtype])
           %td= Time.at(arm[:created_at].to_i).to_s(:db) 
           %td= @waste 
+          %td= raw get_arm_status(arm[:armstatus])
   %hr
     %span 
       = "共计长枪兵有#{@arm1.to_s}人，弓箭手有#{@arm2.to_s}人，骑兵有#{@arm3.to_s}人，消耗食物#{@food}"
