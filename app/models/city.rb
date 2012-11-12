@@ -3,6 +3,23 @@ require "json"
 class City < ActiveRecord::Base
  belongs_to :user
  has_many :arms
+
+  def self.update_city_cache
+    @redis = Redis.new if @redis.nil?
+    @cities = City.all
+    @cities.each {|city|  @redis.hset "city",city.id.to_s,city.name   } 
+  end
+
+
+ def self.get_name(id)
+    @redis = Redis.new if @redis.nil?
+    update_city_cache unless @redis.exists "city"
+    return @redis.hget "city",id
+ end
+
+
+
+
  def get_food_num()
   init_time
   less_hour_food = (self.pfinterval*@interval_second).to_i
@@ -234,11 +251,19 @@ class City < ActiveRecord::Base
         attack_str =  @redis.hget(hkey,attackfield)
         attack = j.decode(attack_str)
         attack_less_time = (Time.at(attack["attack_time"].to_i)-Time.now).to_i
+        back_less_time = (Time.at(attack["back_time"].to_i)-Time.now).to_i
+
         attack_less_time = 0 if attack_less_time<=0
-        if attack_less_time == 0
+        back_less_time = 0 if back_less_time<=0
+        if attack_less_time == 0 && attack["back_time"]==0
           attack["status"]="fight"
          @redis.hset hkey,attackfield,attack.to_json
         end
+
+        back_time = ""
+        back_time == "#{Time.at(attack["back_time"].to_i).to_s(:db)} #{back_less_time}s" if attack["status"]=="back"
+
+
         @task <<  {:key => attack["key"],
                    :user_id => attack["user_id"],
                    :city_id => attack["city_id"],
@@ -246,7 +271,7 @@ class City < ActiveRecord::Base
                    :attack_time => "#{Time.at(attack["attack_time"].to_i).to_s(:db)} #{attack_less_time.to_s}s",
                    :arm_ids => attack["arm_ids"],
                    :status =>  attack["status"],
-                   :back_time => "#{Time.at(attack["back_time"].to_i).to_s(:db)}" }
+                   :back_time => back_time }
      end 
      @task
   end
@@ -293,16 +318,29 @@ class City < ActiveRecord::Base
       defend_city_id = attackfield.split("_")[0]
       @defend_city=City.find defend_city_id
       waste_second =  @defend_city.attack_time(self.id,arm_ids)
-     j = ActiveSupport::JSON
-     attack = j.decode(@redis.hget(hkey,attackfield))
-     attack["status"]="back"
-     attack["arm_ids"]=arm_ids
-     attack["back_time"] =waste_second.to_i 
-     @redis.hset hkey,attackfield,attack.to_json 
+      j = ActiveSupport::JSON
+      attack = j.decode(@redis.hget(hkey,attackfield))
+      attack["status"] = "back"
+      attack["arm_ids"]=arm_ids
+      attack["back_time"] =waste_second.to_i
+      @redis.hset hkey,attackfield,attack.to_json
     end
-
   end
 
+  #回城
+  def back_city(attackfield)
+    init_redis
+    hkey = "attack_#{self.id.to_s}"
+    j = ActiveSupport::JSON
+    attack = j.decode(@redis.hget(hkey,attackfield))
+    leavearm = Arm.find(attack["arm_ids"].split(","))
+    leavearm.each do |arm|
+       arm.armstatus="nor"
+       arm.save
+    end
+    update_arm_cache
+    @redis.hdel hkey,attackfield
+  end
  
 private
    
@@ -419,6 +457,5 @@ private
   def waste_second_to_city(city_id,arm_ids)
     return ((distance_city(city_id)/ Arm.lowst_speed(self.id,arm_ids))*60).to_i
   end
-
 
 end

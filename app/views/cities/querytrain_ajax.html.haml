@@ -16,4 +16,5 @@
           %td
             = train[:started] ? (train[:finished] ? "完成训练" : "还有#{train[:train_time]}秒完成训练") : "等待训练"
           %td
+            -#= link_to("入伍","/finishedarm/#{train[:armtype]}/#{train[:num]}/#{train[:created_at]}/#{@city.id.to_s}",:remote=>true)
             = train[:finished] ? link_to("入伍","/finishedarm/#{train[:armtype]}/#{train[:num]}/#{train[:created_at]}/#{@city.id.to_s}",:remote=>true) : link_to("取消","/canceltrain/#{train[:armtype]}/#{train[:num]}/#{train[:created_at]}/#{@city.id.to_s}",:remote=>true)

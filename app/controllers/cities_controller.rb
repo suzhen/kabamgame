@@ -51,7 +51,7 @@ class CitiesController < ApplicationController
     respond_to do |format|
       if @city.save
         current_user.cities<<@city
-
+        City.update_city_cache
         format.html { redirect_to @city, notice: '城池创建成功。' }
       else
         format.html { render action: "new" }
@@ -66,6 +66,7 @@ class CitiesController < ApplicationController
     current_user.cities.each {|city| city.capital=false;city.save } if params[:city][:capital]
     respond_to do |format|
       if @city.update_attributes(params[:city])
+        City.update_city_cache
         format.html { redirect_to @city, notice: '城池更新成功。' }
       else
         format.html { render action: "edit" }
@@ -78,7 +79,7 @@ class CitiesController < ApplicationController
   def destroy
     @city = City.find(params[:id])
     @city.destroy
-
+    City.update_city_cache
     respond_to do |format|
       format.html { redirect_to cities_url }
     end
@@ -196,9 +197,10 @@ class CitiesController < ApplicationController
     #删除死亡士兵
     dead_arm_ids = arm_ids - survivei_arm_ids 
     #p "死亡士兵"+dead_arm_ids.join(",")
-
-    #Arm.find(dead_arm_ids).destroy_all()
-  
+    dead_arm = Arm.find(dead_arm_ids)
+    dead_arm.each {|arm| arm.destroy }
+    @attack_city.update_arm_cache
+    @defend_city.update_arm_cache 
     @attack_city.finished_attack(params[:ref],attack_survivei_arm_ids.join(',')) 
     @defend_city.finished_defend(params[:key])
     respond_to do |format|
@@ -207,8 +209,8 @@ class CitiesController < ApplicationController
  end
 
  def back_city
-    params[:cityid]
-    params[:key] 
+    @city= City.find  params[:cityid]
+    @city.back_city(params[:key])
     respond_to do |format|
       format.js
     end

@@ -17,8 +17,8 @@
         - @order+=1
         %tr
           %td= @order
-          %td= war[:user_id]
-          %td= war[:city_id]
+          %td= User.get_name(war[:user_id])
+          %td= City.get_name(war[:city_id])
           %td= war[:start_time]
           %td= war[:attack_time]
           %td= war[:back_time]

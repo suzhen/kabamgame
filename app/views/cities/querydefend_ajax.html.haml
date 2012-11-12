@@ -13,7 +13,7 @@
         - @order+=1
         %tr{:style=>"color:red"}
           %td= @order
-          %td= defend[:user_id]
-          %td= defend[:city_id]
+          %td= User.get_name(defend[:user_id])
+          %td= City.get_name(defend[:city_id])
           %td= defend[:arm_ids]
           %td= link_to "迎战","/fightarm/#{defend[:arm_ids]}/#{defend[:ref]}/#{defend[:key]}",:remote=>true
