@@ -86,7 +86,7 @@ class CitiesController < ApplicationController
   end
 
   def get_food
-    current_user.cities.each{|city| city.get_food_num(){|food|food-city.arm_waste_food() }   }
+    current_user.cities.each{|city| city.get_food_num(){|food|food-city.arm_waste_food()  }   }
 
     redirect_to ("/cities")
   end
@@ -197,7 +197,8 @@ class CitiesController < ApplicationController
     #删除死亡士兵
     dead_arm_ids = arm_ids - survivei_arm_ids 
     #p "死亡士兵"+dead_arm_ids.join(",")
-    dead_arm = Arm.find(dead_arm_ids)
+    allarmids = Arm.all.map{|arm| arm.id.to_s}
+    dead_arm = Arm.find(allarmids&dead_arm_ids)
     dead_arm.each {|arm| arm.destroy }
     @attack_city.update_arm_cache
     @defend_city.update_arm_cache 

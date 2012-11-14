@@ -17,9 +17,6 @@ class City < ActiveRecord::Base
     return @redis.hget "city",id
  end
 
-
-
-
  def get_food_num()
   init_time
   less_hour_food = (self.pfinterval*@interval_second).to_i
