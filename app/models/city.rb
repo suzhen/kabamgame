@@ -330,7 +330,7 @@ class City < ActiveRecord::Base
     hkey = "attack_#{self.id.to_s}"
     j = ActiveSupport::JSON
     attack = j.decode(@redis.hget(hkey,attackfield))
-    leavearm = Arm.find(attack["arm_ids"].split(","))
+    leavearm = Arm.find(attack["arm_ids"].split(",")&Arm.all.map{|map| map.id.to_s})
     leavearm.each do |arm|
        arm.armstatus="nor"
        arm.save
