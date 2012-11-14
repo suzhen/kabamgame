@@ -249,18 +249,14 @@ class City < ActiveRecord::Base
         attack = j.decode(attack_str)
         attack_less_time = (Time.at(attack["attack_time"].to_i)-Time.now).to_i
         back_less_time = (Time.at(attack["back_time"].to_i)-Time.now).to_i
-
         attack_less_time = 0 if attack_less_time<=0
         back_less_time = 0 if back_less_time<=0
         if attack_less_time == 0 && attack["back_time"]==0
           attack["status"]="fight"
          @redis.hset hkey,attackfield,attack.to_json
         end
-
         back_time = ""
-        back_time == "#{Time.at(attack["back_time"].to_i).to_s(:db)} #{back_less_time}s" if attack["status"]=="back"
-
-
+        back_time = "#{Time.at(attack["back_time"].to_i).to_s(:db)} #{back_less_time}s" if attack["status"]=="back"
         @task <<  {:key => attack["key"],
                    :user_id => attack["user_id"],
                    :city_id => attack["city_id"],
@@ -268,7 +264,8 @@ class City < ActiveRecord::Base
                    :attack_time => "#{Time.at(attack["attack_time"].to_i).to_s(:db)} #{attack_less_time.to_s}s",
                    :arm_ids => attack["arm_ids"],
                    :status =>  attack["status"],
-                   :back_time => back_time }
+                   :back_time => back_time,
+                   :hasop => attack["status"]=="back"&&back_less_time==0}
      end 
      @task
   end
@@ -452,7 +449,7 @@ private
 
   #计算去另一个城市的花费时间（秒）
   def waste_second_to_city(city_id,arm_ids)
-    return ((distance_city(city_id)/ Arm.lowst_speed(self.id,arm_ids))*60).to_i
+    return ((distance_city(city_id)/ Arm.lowst_speed(arm_ids))*60).to_i
   end
 
 end

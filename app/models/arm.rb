@@ -23,13 +23,13 @@ class Arm < ActiveRecord::Base
       end
   end
 
-  def self.lowst_speed(city,arm_ids)
-     @city=City.find city
+  def self.lowst_speed(arm_ids)
      lowstarm=3
      arr_arm_ids=arm_ids.split(",")
-     @city.get_arm_cache.each do |arm|
-         lowstarm  =  arm[:armtype].to_i<lowstarm ? arm[:armtype].to_i : lowstarm if arr_arm_ids.include? arm[:id]
-     end 
+     arr_arm = arr_arm_ids & Arm.all.map {|arm| arm.id.to_s}
+     Arm.find arr_arm.each do |arm|
+         lowstarm  =  arm[:armtype].to_i<lowstarm ? arm[:armtype].to_i : lowstarm 
+     end
      case lowstarm.to_s
       when "1"
         return PIKEMENSPEED

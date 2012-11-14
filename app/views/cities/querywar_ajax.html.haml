@@ -24,6 +24,6 @@
           %td= war[:back_time]
           %td= war[:arm_ids]
           %td= get_war_status(war[:status])
-          %td= link_to("回城","/backcity/#{@city.id.to_s}/#{war[:key]}",:remote=>true) if war[:status]=="back"
+          %td= link_to("回城","/backcity/#{@city.id.to_s}/#{war[:key]}",:remote=>true) if war[:hasop]
 
  
